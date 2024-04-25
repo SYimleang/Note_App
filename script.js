@@ -33,23 +33,35 @@ createBtn.addEventListener("click", () => {
     inputBox.setAttribute("contenteditable", "true");
     deleteImg.src = "img/delete.png";
     notesContainer.appendChild(inputBox).appendChild(deleteImg);
+    notes = document.querySelectorAll(".input-box");
     updateStorage();
 })
 
-// Delete note function
+// handle delete notes function
 notesContainer.addEventListener("click", (e) => {
     if(e.target.tagName === "IMG") {
         e.target.parentElement.remove();
         updateStorage();
     }
-    else if (e.target.tagName === "P") {
-        notes = document.querySelectorAll(".input-box");
-        notes.forEach(nt => {
-            nt.onkeyup = function() {
-                updateStorage();
-            }
-        })
-    }
-    
 })
 
+// Debounce function to delay execution
+const debounce = (func, delay) => {
+    let timeoutId;
+    return (...args) => {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+        timeoutId = setTimeout(() => {
+            func(...args);
+        }, delay);
+    };
+};
+
+// Update local storage on keyup with debounce
+const debouncedUpdateStorage = debounce(updateStorage, 1000);
+
+// Update storage when note content changes
+notesContainer.addEventListener("input", () => {
+    debouncedUpdateStorage();
+});
